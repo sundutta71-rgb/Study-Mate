@@ -1,22 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyMate — your study desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>StydyBuddy 📚
-        <p>Your personal study planner</p>
-    </header>
 
-    <main>
-        <section class="dashboard">
-            <h2>Welcome back Mate</h2>
-              <p>Let's make today productive.</p>
-        </section>
-    </main>
-     <script src="script.js"></script>
-    
+<div class="app">
+
+  <!-- Notebook-spine navigation -->
+  <nav class="spine" aria-label="Sections">
+    <div class="spine-brand">
+      <span class="spine-brand-mark">SM</span>
+      <span class="spine-brand-name">StudyMate</span>
+    </div>
+    <button class="tab" data-section="today" aria-current="true">
+      <span class="tab-index">Today</span>
+      <span class="tab-label">Focus timer</span>
+    </button>
+    <button class="tab" data-section="tasks">
+      <span class="tab-index">Tasks</span>
+      <span class="tab-label">Assignments &amp; to-dos</span>
+    </button>
+    <button class="tab" data-section="cards">
+      <span class="tab-index">Cards</span>
+      <span class="tab-label">Flashcard decks</span>
+    </button>
+    <button class="tab" data-section="schedule">
+      <span class="tab-index">Week</span>
+      <span class="tab-label">Study schedule</span>
+    </button>
+    <div class="spine-foot">Saved on this device</div>
+  </nav>
+
+  <main class="stage">
+
+    <!-- ===== TODAY / POMODORO ===== -->
+    <section class="panel" id="panel-today" data-active="true">
+      <header class="panel-head">
+        <h1>Sit down and focus</h1>
+        <p class="panel-sub">One session at a time. Pick a length, start the clock, and let the room go quiet.</p>
+      </header>
+
+      <div class="timer-layout">
+        <div class="timer-face" id="timerFace" data-mode="focus">
+          <svg viewBox="0 0 220 220" class="timer-ring" aria-hidden="true">
+            <circle cx="110" cy="110" r="98" class="ring-track"></circle>
+            <circle cx="110" cy="110" r="98" class="ring-progress" id="ringProgress"></circle>
+          </svg>
+          <div class="timer-readout">
+            <span class="timer-mode" id="timerModeLabel">Focus</span>
+            <span class="timer-time" id="timerTime">25:00</span>
+            <span class="timer-round" id="timerRound">Round 1</span>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <div class="control-row">
+            <button class="btn btn-primary" id="btnStartPause">Start</button>
+            <button class="btn btn-ghost" id="btnReset">Reset</button>
+          </div>
+
+          <div class="length-picker" role="group" aria-label="Session length">
+            <span class="picker-label">Focus length</span>
+            <div class="picker-options" id="focusLengthOptions">
+              <button class="chip" data-mins="25">25 min</button>
+              <button class="chip" data-mins="45">45 min</button>
+              <button class="chip" data-mins="50">50 min</button>
+            </div>
+          </div>
+
+          <div class="length-picker" role="group" aria-label="Break length">
+            <span class="picker-label">Break length</span>
+            <div class="picker-options" id="breakLengthOptions">
+              <button class="chip" data-mins="5">5 min</button>
+              <button class="chip" data-mins="10">10 min</button>
+              <button class="chip" data-mins="15">15 min</button>
+            </div>
+          </div>
+
+          <div class="session-tally">
+            <span id="sessionCount">0</span> focus sessions completed today
+          </div>
+        </div>
+      </div>
+
+      <div class="today-glance">
+        <h2>What's due</h2>
+        <ul class="glance-list" id="glanceTasks">
+          <!-- populated by JS -->
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== TASKS ===== -->
+    <section class="panel" id="panel-tasks">
+      <header class="panel-head">
+        <h1>Assignments &amp; to-dos</h1>
+        <p class="panel-sub">Everything you owe a class, in one list.</p>
+      </header>
+
+      <form class="task-form" id="taskForm">
+        <input type="text" id="taskTitle" placeholder="e.g. Read chapter 4, draft essay outline" required>
+        <input type="text" id="taskSubject" placeholder="Subject (optional)">
+        <input type="date" id="taskDue">
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+
+      <div class="task-filters" role="group" aria-label="Filter tasks">
+        <button class="filter-btn" data-filter="open" aria-current="true">Open</button>
+        <button class="filter-btn" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="done">Done</button>
+      </div>
+
+      <ul class="task-list" id="taskList"></ul>
+      <p class="empty-note" id="taskEmptyNote">Nothing here yet — add what's due above.</p>
+    </section>
+
+    <!-- ===== FLASHCARDS ===== -->
+    <section class="panel" id="panel-cards">
+      <header class="panel-head">
+        <h1>Flashcard decks</h1>
+        <p class="panel-sub">Build a deck, then flip through it to test yourself.</p>
+      </header>
+
+      <div class="deck-shelf" id="deckShelf"></div>
+
+      <form class="deck-form" id="deckForm">
+        <input type="text" id="deckName" placeholder="New deck name, e.g. Spanish verbs" required>
+        <button type="submit" class="btn btn-primary">Create deck</button>
+      </form>
+
+      <div class="deck-workspace" id="deckWorkspace" hidden>
+        <div class="workspace-head">
+          <h2 id="activeDeckName">Deck</h2>
+          <button class="btn btn-ghost" id="btnDeleteDeck">Delete deck</button>
+        </div>
+
+        <div class="card-study" id="cardStudy" hidden>
+          <button class="flashcard" id="flashcard" aria-live="polite">
+            <span class="flashcard-face flashcard-front" id="cardFront"></span>
+            <span class="flashcard-face flashcard-back" id="cardBack"></span>
+          </button>
+          <div class="study-controls">
+            <button class="btn btn-ghost" id="btnPrevCard">← Prev</button>
+            <span class="study-position" id="studyPosition">1 / 1</span>
+            <button class="btn btn-ghost" id="btnNextCard">Next →</button>
+          </div>
+          <p class="flip-hint">Tap the card to flip it</p>
+        </div>
+        <p class="empty-note" id="cardsEmptyNote">This deck has no cards yet — add one below.</p>
+
+        <form class="card-form" id="cardForm">
+          <input type="text" id="cardFrontInput" placeholder="Front (question / term)" required>
+          <input type="text" id="cardBackInput" placeholder="Back (answer / definition)" required>
+          <button type="submit" class="btn btn-primary">Add card</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== SCHEDULE ===== -->
+    <section class="panel" id="panel-schedule">
+      <header class="panel-head">
+        <h1>Study schedule</h1>
+        <p class="panel-sub">Block out when you'll actually sit down to work, day by day.</p>
+      </header>
+
+      <form class="block-form" id="blockForm">
+        <select id="blockDay" required>
+          <option value="" disabled selected>Day</option>
+          <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+          <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+        </select>
+        <input type="time" id="blockTime" required>
+        <input type="text" id="blockLabel" placeholder="e.g. Chemistry problem set" required>
+        <button type="submit" class="btn btn-primary">Add block</button>
+      </form>
+
+      <div class="week-grid" id="weekGrid"></div>
+    </section>
+
+  </main>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
